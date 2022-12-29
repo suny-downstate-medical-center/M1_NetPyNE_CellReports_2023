@@ -1,1 +1,0 @@
-../kdrin.mod

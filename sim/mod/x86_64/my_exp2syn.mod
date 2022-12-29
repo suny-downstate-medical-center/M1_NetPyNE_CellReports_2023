@@ -1,1 +1,0 @@
-../my_exp2syn.mod

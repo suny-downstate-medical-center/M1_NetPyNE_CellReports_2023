@@ -1,1 +1,0 @@
-../IKsin.mod

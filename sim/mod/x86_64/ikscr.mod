@@ -1,1 +1,0 @@
-../ikscr.mod
