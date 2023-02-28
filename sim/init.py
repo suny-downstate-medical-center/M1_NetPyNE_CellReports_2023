@@ -71,6 +71,7 @@ sim.setupRecording()              			# setup variables to record for each cell (
 # Simulation option 1: standard
 # sim.runSim()                              # run parallel Neuron simulation (calling func to modify mechs)
 
+print(cfg.modifyMechs)
 # Simulation option 2: interval function to modify mechanism params
 sim.runSimWithIntervalFunc(1000.0, modifyMechsFunc)       # run parallel Neuron simulation (calling func to modify mechs)
 
