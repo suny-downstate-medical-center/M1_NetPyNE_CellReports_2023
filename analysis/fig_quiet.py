@@ -21,9 +21,9 @@ def fig_quiet():
     # ---------------------------------------------------------------------------------------------------------------
     # Config
 
-    raster = 1
-    histogram = 1
-    traces = 1
+    raster = 0
+    histogram = 0
+    traces = 0
     stats_boxplot = 1   # boxplot of rates
 
     fontsiz = 16
@@ -166,24 +166,6 @@ def fig_quiet():
         timeRange = [2000, 4000]
 
 
-        # plot all cells recorded
-        '''
-        include = list(range(10073))
-        timeRange = [2000, 4000]
-        recordStep = 0.1
-        t = np.arange(timeRange[0], timeRange[1]+recordStep, recordStep)
-        for gid in include:
-            fullTrace = sim.allSimData['V_soma']['cell_'+str(gid)]
-            vtrace = np.array(fullTrace[int(timeRange[0]/recordStep):int(timeRange[1]/recordStep)])
-            plt.figure(figsize=(12, 4))
-            plt.plot(t[:len(vtrace)], vtrace, linewidth=1, color='black')
-            plt.ylim(-100,40)
-            plt.xlabel('time (ms)')
-            plt.ylabel('mV')
-            plt.savefig('%s/V_traces/v56_batch23_V_soma_time_%d_%d_cell_%d' % (root, timeRange[0], timeRange[1], gid))
-        '''
-
-
         # plot subset of cells with the correct format 
         from netpyne.support.scalebar import add_scalebar
 
@@ -214,7 +196,7 @@ def fig_quiet():
             ax = plt.gca()
             plt.title('')
             plt.tight_layout()
-            plt.savefig('%s/V_traces/%s_V_soma_cell_%d_%d_%d_x1.5_axis.png' % (root, simLabel, gid, timeRange[0], timeRange[1]), dpi=200)
+            plt.savefig('%s/%s_V_soma_cell_%d_%d_%d_x1.5_axis.png' % (root, simLabel, gid, timeRange[0], timeRange[1]), dpi=200)
 
 
     # ---------------------------------------------------------------------------------------------------------------
