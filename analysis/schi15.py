@@ -3,193 +3,21 @@ schi15.py
 
 Preprocess Schi15 data (data from Schiemann et al 2015, Cell Reports paper)
 
-Notes from Joshua Dacre (Jan 31, 2020):
-"With regards to motion index, we used a threshold of 0.5 AU and periods >2s long as locomotion, ambiguous was defined as a 0.5s peri-(motion index > 0.5 but length of threshold crossing <2s) period, and quiet wakeful as anything else. 
-First of all, motion index is measured in AU = arbitrary units. I believe we defined the ambiguous period as any <2 sec long MI threshold crossing including the 0.5s period either side of the threshold crossing. Thus any period of QW was at least 0.5s away from a MI threshold crossing. I hope that's slightly more clear."
-
-
 Contributors: salvadordura@gmail.com
 """
 
 import numpy as np
 from scipy.io import loadmat
 import os 
-from os.path import isfile, join
 import pandas
 import openpyxl as xl
 from matplotlib import pyplot as plt
 
-def dataFromPaperFigs():
-    data = {}
-
-    # L5B enhanced (quiet, move)
-    data['L5Benh'] =    [[-0.08, 1.24],
-                        [1.75,	5.99],
-                        [2.09,	6.97],
-                        [2.26,	3.77],
-                        [2.5,	6.07],
-                        [2.65,	19.3],
-                        [2.98,	6.07],
-                        [3.43,	13.24],
-                        [3.44,	4.63],
-                        [3.45,	7.94],
-                        [3.98,	8.9],
-                        [4.01,	14.55],
-                        [4.18,	17.53],
-                        [5.05,	12.51],
-                        [5.18,	17.54],
-                        [5.47,	15.01],
-                        [5.7,	9.99],
-                        [8.5,	15.2],
-                        [9.15,	20.3],
-                        [9.17,	13.16],
-                        [10.67,	14.53],
-                        [11.72,	20.53],
-                        [12.96,	34.63],
-                        [13.68,	19.92]]
-
-
-    # L5B no-response (quiet, move)
-    data['L5Bnr'] =   [[1.28, 0.30],
-                        [0.27, 0.30],
-                        [3.50, 4.61],
-                        [9.82, 8.85]]
-
-
-    # L5B suppressed (quiet, move)
-    data['L5Bsupp'] =  [[12.82, 10.23],
-                        [15.94, 5.77],
-                        [1.49, 0.53],
-                        [2.04, 0.75],
-                        [3.33, 0.23],
-                        [3.06, 1.35],
-                        [4.75, 0.68],
-                        [4.89, 2.56],
-                        [6.62, 2.78],
-                        [7.40, 2.94],
-                        [6.86, 3.91],
-                        [6.25, 3.98],
-                        [7.06, 5.03],
-                        [8.90, 4.21],
-                        [9.71, 2.12]]
-
-
-    # L2/3 (quiet, move)
-    data['L23'] =  [[-0.01, 0.02],
-                    [0,	0.32],
-                    [0.02,	0.53],
-                    [0.27,	0.52],
-                    [0.32,	0.01],
-                    [0.7,	0.07],
-                    [2.16,	3.36],
-                    [0.87, 0.05]]
-
-    # mth-inact (quiet, move)
-    data['mth-inact'] = [[0.1, 0.43],
-                        [0.3, 0.91],
-                        [0.33, -0.05],
-                        [0.85, 0.06],
-                        [2, 0.7],
-                        [2.95, 11.14]]
-
-
-    # na-block (quiet, move)
-    data['na-block'] = [[0.43, 0.0],
-                        [0.58, 0.0],
-                        [0.93, 0.19],
-                        [0.98, 0.1],
-                        [1.04, 0.03],
-                        [1.17, 0.71],
-                        [1.36, 0.37],
-                        [1.54, 0.94],
-                        [1.62, 0.02],
-                        [1.81, 0.54],
-                        [1.98, 0.21],
-                        [2.31, 1.05],
-                        [2.56, 8.21],
-                        [2.95, 0.7],
-                        [3.11, 5.81],
-                        [5.47, 1.38]]
-
-    # na-block (quiet) - from different fig, confirms above values
-    data['na-block-quiet'] = [  0.4,
-                                0.54,
-                                0.93,
-                                1.01,
-                                1.03,
-                                1.16,
-                                1.22,
-                                1.49,
-                                1.52,
-                                1.9,
-                                2.17,
-                                2.37,
-                                2.59,
-                                2.98,
-                                3.13,
-                                5.49]
-
-    # adjust all datasets so min value = 0 (corrects WebPlotDigitizer axes calibration)
-    for x1 in data.values():
-        minX = np.min(x1)
-        if minX < 0.0:
-            for i2,x2 in enumerate(x1):
-                if isinstance(x2, list):
-                    for i3,x3 in enumerate(x2):
-                        x2[i3] += -minX
-                else:
-                    x1[i2] += -minX
-
-    # list of main dataset values
-    data['main'] = data['L5Benh'] + data['L5Bnr'] + data['L5Bsupp']    
-
-    # Calculate mean rates for paper
-    ihValues = ['low', 'medium', 'high']
-    VLValues = ['low', 'medium', 'high']
-
-    rates = np.zeros((len(ihValues), len(VLValues)))
-
-    # ih=medium; VL=medium: quiet (wakefulness) --> ih = medium (1.0, 0.75, 0.25?); only bkg inputs (~5.6Hz); 
-    # from data = 5.8Hz (exclude='movement'), 5.1Hz (exclude='on')
-    # from fig = 5.86Hz
-    rates[1, 1] = np.mean([x[0] for x in data['main']]) 
-
-    # ih=low, VL=high: movement (self-paced, voluntary) --> ih = low (0.25) + increased VL or other inputs (bimodal: ~2Hz vs ~13Hz); 
-    # from data = 7.2Hz
-    # from fig = 8.66Hz
-    rates[0, 2] = np.mean([x[1] for x in data['main']]) 
-
-    # ih=medium; VL=low: inactive VL; quiet --> ih medium (?); only bkg inputs; VL = 0 (~1Hz); 
-    # from data = 3.1Hz (exclude='movement'), 3.3Hz (exclude='on') (!)
-    # from fig = 1.14Hz
-    rates[1, 0] = np.mean([x[0] for x in data['mth-inact']])
-
-    # ih=low; VL=low: inactive VL; movement -->  ih low (0.25); only bkg inputs; VL = 0 (~2Hz); 
-    # from data = 4.7Hz (!)
-    # from fig = 2.25
-    rates[0, 0] = np.mean([x[1] for x in data['mth-inact']])
-    
-    # ih=high; VL=medium: NA-R antagonist; quiet --> ih high (?); only bkg inputs0 (~1.8Hz); 
-    # from data = 1.5Hz (exclude='movement'), 1.3Hz (exclude='on')
-    # from fig = 1.87Hz
-    rates[2, 1] = np.mean([x[0] for x in data['na-block']])
-    
-    # ih=high; VL=high: NA - R antagonist; movement - ->ih high(?); bkg inputs + high VL(bimodal: ~ 1 HZ vs ~ 7 Hz; ~1.4Hz); 
-    # from data = 1.3Hz
-    # from fig = 1.27Hz
-    rates[2, 2] = np.mean([x[1] for x in data['na-block']])
-
-    return rates
 
 def getMovementVsQuietPeriods(motionIndex, motionIndexTimes, threshold = 0.5, minDur = 2.0, bufferDur = 0.5, exclude='on'):
     '''
     Classify movement periods based on motion indexs
     '''
-
-    # set params
-    # threshold = 0.5  # motion index threshold (AU)
-    # minDur = 2.0  # min duration for movement (sec)
-    # bufferDur = 0.5  # duration around movement to consider ambigous (sec) 
 
     # find quiet vs movement periods
     lastSwitchOn = 0
@@ -215,7 +43,6 @@ def getMovementVsQuietPeriods(motionIndex, motionIndexTimes, threshold = 0.5, mi
             onPeriods.append([float(lastSwitchOn), float(t)])
 
     movementPeriods = [x for x in onPeriods if x[1] - x[0] >= minDur]
-    ambiguousPeriods = [x for x in onPeriods if x[1] - x[0] < minDur]
     quietPeriods = offPeriods
     if exclude == 'on':  # exclude 0.5s around all on periods (threshold crossings)
         excludeQuietPeriods = [[x[0] - 0.5, x[0]] for x in onPeriods] + [[x[1], x[1] + 0.5] for x in onPeriods]
@@ -235,8 +62,8 @@ def getMovementVsQuietPeriods(motionIndex, motionIndexTimes, threshold = 0.5, mi
                 quietPeriod[0] < excludeQuietPeriod[0]: # if end in exclude and start before
                 quietPeriods[i][1] = excludeQuietPeriod[0]  # set new end to exclude
 
-
     return movementPeriods, quietPeriods
+
 
 
 def readSpikeTimesAndExcelMetadata():
@@ -320,6 +147,7 @@ def readSpikeTimesAndExcelMetadata():
     
     return df
 
+
 def readExcelFiringRatesAndMetada():
     '''
     Read experimental data and store in pandas data fram
@@ -359,10 +187,7 @@ def readExcelFiringRatesAndMetada():
         if df.empty:
             df = pandas.DataFrame(list(cellsData.values()))
         else:
-            df = pandas.concat([df, pandas.DataFrame(list(cellsData.values()))])
-
-        # example of querying: df.query('condition=="main" and type=="IT"') 
-    
+            df = pandas.concat([df, pandas.DataFrame(list(cellsData.values()))])    
     
     return df
 
@@ -375,16 +200,13 @@ def getIhVsVLRates(df, avg = 'mean'):
     rates = np.zeros((len(ihValues), len(VLValues)))
 
     if avg == 'mean':
-        # ih=medium; VL=medium: quiet (wakefulness) --> ih = medium (1.0, 0.75, 0.25?); only bkg inputs (~5.6Hz); 
-        # from data = 5.8Hz (exclude='movement'), 5.1Hz (exclude='on')
+        # ih=medium; VL=medium: quiet (wakefulness) 
         rates[1, 1] = df[df.condition=="main"].quietFR.mean() 
 
-        # ih=low, VL=high: movement (self-paced, voluntary) --> ih = low (0.25) + increased VL or other inputs (bimodal: ~2Hz vs ~13Hz); 
-        # from data = 7.2Hz
-        rates[0, 2] = df[df.condition=="main"].moveFR.mean() # ~7
+        # ih=low, VL=high: movement (self-paced, voluntary) 
+        rates[0, 2] = df[df.condition=="main"].moveFR.mean() #
 
-        # ih=medium; VL=low: inactive VL; quiet --> ih medium (?); only bkg inputs; VL = 0 (~1Hz); 
-        # from data = 3.1Hz (exclude='movement'), 3.3Hz (exclude='on') (!)
+        # ih=medium; VL=low: inactive VL; quiet 
         rates[1, 0] = df[df.condition=="mth-inact"].quietFR.mean()
 
         # ih=low; VL=low: inactive VL; movement -->  ih low (0.25); only bkg inputs; VL = 0 (~2Hz); 
@@ -454,6 +276,7 @@ def readTraces(rootFolder, inputFolder, dataFile):
     timeLabels.append('quietmove')
 
     return dataV, fs, timeRanges, timeLabels, onlimits, offlimits 
+
 
 def plotTracesMain():
     rootFolder = '../data/Schi15/'
@@ -605,84 +428,15 @@ def plotTracesMThInact():
 
 
 
-def plotTracesNaBlock():
-    rootFolder = '../data/Schi15/'
-    inputFolder = '/NaBlock_Dataset_Movement_Times/' #Additional_Files_July_2020/'
-    outputFolder = '/voltageTraces/'
-    dataFiles = ['5002.mat'] #['%d.mat' % (x) for x in range(5000, 5006)]
-
-    for dataFile in dataFiles:
-        print(dataFile)
-
-        dataV, fs, timeRanges, timeLabels, onlimits, offlimits = readTraces(rootFolder, inputFolder, dataFile )
-
-        moveTime = (onlimits[1] * 1000 / fs)
-        print(moveTime)
-        timeRanges = [[moveTime - 1000, moveTime + 2000]]
-        timeLabels = ['quietmovequiet'] 
-
-        fontSize = 20
-        
-        color = 'black'
-        axis = False
-        ylim = [-60, 5]
-
-        plt.rcParams.update({'font.size': fontSize})
-        fontsiz = fontSize
-    
-        for timeRange, timeLabel in zip(timeRanges, timeLabels):
-            v = dataV[int(timeRange[0] * fs / 1000.):int(timeRange[1]*fs/1000.)]
-            t = range(len(v))
-
-            figSize=(min(30, 2 * (timeRange[1] - timeRange[0]) / 1000.0), 3.5)
-            figSize = (15*1.5, 3.5)
-            plt.figure(figsize=figSize)
-            plt.plot(t, v, linewidth=1.5, color=color, label='L5B Experiment')
-            plt.xlabel('Time (ms)', fontsize=fontsiz)
-            plt.ylabel('mV', fontsize=fontsiz)
-            #plt.xlim(t) #timeRange)
-            #if ylim: plt.ylim(ylim)
-            plt.axis('off')
-            #addScaleBar(timeRange) # same scale as model
-
-            if timeLabel == 'quietmove': # add dashed lines
-                for onlimit in onlimits:
-                    y = range(ylim[0], ylim[1])
-                    x = [onlimit ] * len(y)
-                    plt.plot(x, y, 'g--')
-                for offlimit in offlimits:
-                    y = range(ylim[0], ylim[1])
-                    x = [offlimit] * len(y)
-                    plt.plot(x, y, 'r--')
-            
-            if timeLabel == 'quietmovequiet':  # add dashed lines
-                offset = 10000
-                for onlimit in [offset]:
-                    y = range(ylim[0], ylim[1])
-                    x = [onlimit] * len(y)
-                    plt.plot(x, y, 'g--')
-                # for offlimit in [offlimits[1] - onlimits[1] + offset]:
-                #     y = range(ylim[0], ylim[1])
-                #     x = [offlimit] * len(y)
-                #     plt.plot(x, y, 'r--')
-
-            plt.savefig('%s/%s/%s_%s_%d_%d_mth.png' % (rootFolder, outputFolder, dataFile[:-4], timeLabel, timeRange[0], timeRange[1]), dpi=300)
-
-
 
 # ------------------------------------------------------------------------
 # Main code
 # ------------------------------------------------------------------------
-# ----------------------------------------------------------------------------------------------------
-# Main code
 if __name__ == '__main__':
-    #df = readSpikeTimesAndExcelMetadata()
-    #df = readExcelFiringRatesAndMetada()
-    #df.dropna()
-    #ratesExcel = getIhVsVLRates(df)
-    #ratesPaper = dataFromPaperFigs()
+    df = readExcelFiringRatesAndMetada()
+    df.dropna()
+    ratesExcel = getIhVsVLRates(df)
     plotTracesMain()
-    #plotTracesMThInact()
-    #plotTracesNaBlock()
+    plotTracesMThInact()
 
 

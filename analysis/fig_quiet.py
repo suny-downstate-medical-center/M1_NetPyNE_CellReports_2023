@@ -1,6 +1,4 @@
 """
-fig_quiet.py 
-
 M1 paper Figure 2 
 
 Contributors: salvadordura@gmail.com
@@ -23,13 +21,13 @@ def fig_quiet():
 
     raster = 0
     histogram = 0
-    traces = 0
-    stats_boxplot = 1   # boxplot of rates
+    traces = 1
+    stats_boxplot = 0   # boxplot of rates
 
     fontsiz = 16
 
     dataFolder = '../data/'
-    if  raster or histogram or traces:  # 2 sec N=1  
+    if  raster or histogram or traces:    
         batchLabel = 'v56_batch18'  
         simLabel = 'v56_batch18_0_0_0'  # same as 'v56_batch7_7_3_0_0'
 
@@ -189,8 +187,7 @@ def fig_quiet():
             plt.figure(figsize=(15*1.5*0.5, 2.5))
             plt.plot(t[:len(vtrace)], vtrace, linewidth=1, color=popColors['IT5B'])
             baseline = min(vtrace)
-            plt.ylim(baseline, baseline+60) #TRUNCATE AT 60mV above baseline!
-            #addScaleBar()
+            plt.ylim(baseline, baseline+60) # truncate AT 60mV above baseline!
             plt.axis('off')
 
             ax = plt.gca()
@@ -238,7 +235,7 @@ def fig_quiet():
         from scipy.io import loadmat
         
         ## Este18 L5 RS and PV baseline  
-        matData = loadmat(dataFolder+'/Este18/data_v2.mat')  # [0][0][2][0] = RS; [0][0][2][0] = PV+
+        matData = loadmat(dataFolder+'/Este18/data.mat')  # [0][0][2][0] = RS; [0][0][2][0] = PV+
 
         expData['Este18_L5_RS_baseline'] = list(matData['baseline'][0][0][0][0]) + \
                                         list(matData['sound_base'][0][0][0][0]) + \
