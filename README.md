@@ -4,7 +4,7 @@ Multiscale model of mouse primary motor cortex (M1) developed using NetPyNE (www
 
 The model is described in the following paper: 
 
-- Dura-Bernal S, Neymotin SA, Suter BA, Dacre J, Moreira JVS, Urdapilleta E, Schiemann J, Duguid I, Shepherd GMG, Lytton WW. **Multiscale model of primary motor cortex circuits predicts in vivo cell type-specific, behavioral state-dependent dynamics.** BioRxiv 2022.02.03.479040; doi: https://doi.org/10.1101/2022.02.03.479040. (Under review in Cell Reports) 
+- Dura-Bernal S, Neymotin SA, Suter BA, Dacre J, Moreira JVS, Urdapilleta E, Schiemann J, Duguid I, Shepherd GMG, Lytton WW. **Multiscale model of primary motor cortex circuits predicts in vivo cell type-specific, behavioral state-dependent dynamics.** Cell Reports (In Press) 
 
 
 ## Setup and execution
