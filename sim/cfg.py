@@ -149,7 +149,7 @@ cfg.weightNorm = 1  # use weight normalization
 cfg.weightNormThreshold = 4.0  # weight normalization factor threshold
 
 cfg.addConn = 1
-cfg.scale = 1.0
+cfg.scale = 0.3
 cfg.sizeY = 1350.0
 cfg.sizeX = 300.0
 cfg.sizeZ = 300.0
