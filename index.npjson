@@ -1,0 +1,7 @@
+{
+    "mod_folder": "sim/mod",
+    "simConfig": "sim/netParams.py",
+    "simConfig_variable": "cfg",
+    "netParams": "sim/netParams.py",
+    "python_run": "sim/init.py"
+}

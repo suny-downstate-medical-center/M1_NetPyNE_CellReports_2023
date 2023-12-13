@@ -17,7 +17,7 @@ netParams.version = 56
 try:
     from __main__ import cfg  # import SimConfig object with params from parent module
 except:
-    from cfg import cfg
+    from sim.cfg import cfg
 
 #------------------------------------------------------------------------------
 #
