@@ -55,7 +55,7 @@ cfg.recordTraces = {'V_soma': {'sec':'soma', 'loc':0.5, 'var':'v'}}#,
 					# 'V_dend_5': {'sec':'dend_5', 'loc':0.5, 'var':'v', 'conds':{'pop': 'PT5B'}}}
 					#'I_AMPA_Adend2': {'sec':'Adend2', 'loc':0.5, 'synMech': 'AMPA', 'var': 'i'}}
 
-cfg.recordLFP = [[150, y, 150] for y in range(200,1300,100)] # [[150, y, 150] for y in range(200,1300,100)]
+cfg.recordLFP = [[150, y, 150] for y in list(range(200,1300,100))] # [[150, y, 150] for y in list(range(200,1300,100))]
 
 cfg.saveLFPPops =  False # allpops 
 
